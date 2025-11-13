@@ -242,8 +242,8 @@ class MainWindow(QMainWindow):
     
     def show_about(self):
         msg = f"""
-SeatShuffler {data.VERSION}
-Copyright (C) 2025 元气科技工作室 YuanqiTech Studio. All rights reserved.
+SeatShuffler {data.VERSION} By 元气科技工作室 (25年末重生版)
+此项目按GPL v3许可证开源。
 
 第三方许可证信息: 
 Python (Python License)
