@@ -9,15 +9,18 @@ v=[]
 def shuffle(file1, file2, method, output):
     """主函数"""
     global merged_cells,c,v
-    with open(file1,encoding='utf8') as f:
-        # 随时更改此处
-        text=f.read()
-        students=[]
-        genders=[]
-        for i in text.split('\n'):
-            j=i.split(' ')
-            students.append(j[0])
-            genders.append(j[1])
+    wb=xl.load_workbook(file1)
+    ws=wb.active
+    for i in range(1,ws.max_column+1):
+        if any([j in str(ws.cell(1,i).value) for j in ['姓名','名字']]):
+            students=[ws.cell(j,i).value for j in range(2,ws.max_row+1)]
+        if '性别' in str(ws.cell(1,i).value):
+            genders=[ws.cell(j,i).value for j in range(2,ws.max_row+1)]
+    students=list(filter(lambda x:x,students))
+    genders=list(filter(lambda x:x,genders))
+    # print(students,genders)
+    if len(students)!=len(genders):
+        raise RuntimeError("?")
     book=xl.load_workbook(file2)
     sheet=book.active
 
@@ -68,7 +71,7 @@ def shuffle(file1, file2, method, output):
     # print(n,m,pre_boys,pre_girls,sep='\n')
 
     # 调用算法
-    print(type(method))
+    # print(type(method))
     if method==0:
         res=algo.allocate_groups(n,m,pre_boys,pre_girls,total_boys,total_girls)
     if method==1:
@@ -149,4 +152,4 @@ def res_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 if __name__=='__main__':
-    shuffle('test.txt','test.xlsx',2,'result.xlsx')
+    shuffle('2-1名单.xlsx','test2.xlsx',0,'result.xlsx')
