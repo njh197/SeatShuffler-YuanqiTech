@@ -21,7 +21,7 @@ class InputPage(QWidget):
         
     def setup_ui(self):
         # 标题
-        title_label = TitleLabel(f"座位随机分配系统 {data.VERSION}")
+        title_label = TitleLabel(f"SeatShuffler 座位随机分配系统")
         title_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(title_label)
         
