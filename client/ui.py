@@ -138,7 +138,6 @@ class InputPage(QWidget):
 
             # 尝试打开结果文件
             self.open_result_file(output_file)
-
         except Exception as e:
             MessageBox("错误", f"执行过程中出现错误：\n{str(e)}", self).exec()
             # 重新启用按钮
