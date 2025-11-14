@@ -1,6 +1,4 @@
-import os
-import sys
-import subprocess
+import os, sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QStackedWidget)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -14,9 +12,7 @@ class InputPage(QWidget):
         super().__init__(parent)
         self.parent = parent
         self.layout = QVBoxLayout(self)
-        self.setup_ui()
 
-    def setup_ui(self):
         # 标题
         title_label = TitleLabel(f"SeatShuffler 座位随机分配系统")
         title_label.setAlignment(Qt.AlignCenter)
@@ -139,7 +135,7 @@ class InputPage(QWidget):
             # 尝试打开结果文件
             self.open_result_file(output_file)
         except Exception as e:
-            MessageBox("错误", f"执行过程中出现错误：\n{str(e)}", self).exec()
+            MessageBox("错误", f"执行过程中出现错误：\n{e.__class__.__name__}: {str(e)}", self).exec()
             # 重新启用按钮
             self.complete_btn.setEnabled(True)
 
@@ -149,15 +145,9 @@ class InputPage(QWidget):
             return
 
         try:
-            # 根据不同操作系统打开文件
-            if sys.platform == "win32":
-                os.startfile(result_file)
-            elif sys.platform == "darwin":  # macOS
-                subprocess.run(["open", result_file])
-            else:  # Linux
-                subprocess.run(["xdg-open", result_file])
+            core.open_file(result_file)
         except Exception as e:
-            MessageBox("警告", f"无法自动打开结果文件: {str(e)}", self).exec()
+            MessageBox("警告", f"无法自动打开结果文件: \n{e.__class__.__name__}: {str(e)}", self).exec()
 
 
 class CompletePage(QWidget):
@@ -165,11 +155,9 @@ class CompletePage(QWidget):
         super().__init__(parent)
         self.parent = parent
         self.layout = QVBoxLayout(self)
-        self.setup_ui()
 
-    def setup_ui(self):
         # 完成消息
-        complete_label = TitleLabel("完成！")
+        complete_label = TitleLabel("完成")
         complete_label.setAlignment(Qt.AlignCenter)
         complete_label.setStyleSheet("color: green;")
         self.layout.addWidget(complete_label)
@@ -195,12 +183,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(f"SeatShuffler {data.VERSION}")
         self.resize(700, 400)
-
-        # 设置窗口图标
-        if os.path.exists(data.ICON):
-            self.setWindowIcon(QIcon(data.ICON))
-
-        # 设置主题
+        self.setWindowIcon(QIcon(data.ICON))
         setTheme(Theme.LIGHT)
 
         # 创建堆叠窗口
@@ -219,20 +202,10 @@ class MainWindow(QMainWindow):
         self.switchToInputPage()
 
         # 创建菜单栏
-        self.create_menubar()
-
-    def create_menubar(self):
-        # 创建菜单栏
         menubar = self.menuBar()
-
-        # 添加帮助菜单
         help_menu = menubar.addMenu("帮助")
-
-        # 添加格式说明动作
         format_action = help_menu.addAction("格式说明")
         format_action.triggered.connect(self.show_format_help)
-
-        # 添加关于动作
         about_action = help_menu.addAction("关于")
         about_action.triggered.connect(self.show_about)
 
@@ -244,7 +217,6 @@ class MainWindow(QMainWindow):
 
     def switchToInputPage(self):
         self.stacked_widget.setCurrentWidget(self.input_page)
-        # 重新启用完成按钮
         self.input_page.complete_btn.setEnabled(True)
 
     def switchToCompletePage(self, output_file):
@@ -254,11 +226,6 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-
-    # 设置应用程序图标
-    if os.path.exists("icon.ico"):
-        app.setWindowIcon(QIcon("icon.ico"))
-
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
