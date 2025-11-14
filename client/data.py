@@ -1,10 +1,13 @@
 # import logging # TODO
+from core import res_path
 
 STATUS = "Beta"
 VER1 = "3.0"
 VER2 = "b4"
 VERSION = f"{STATUS} {VER1} ({VER2})"
 METHODS = ["男女混合", "男女分开", "完全随机"]
+
+ICON = res_path('icon.ico')
 
 ABOUT_TEXT = f"""
 SeatShuffler {VERSION} By 元气科技工作室 (25年末重生版)

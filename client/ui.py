@@ -198,8 +198,8 @@ class MainWindow(QMainWindow):
         self.resize(700, 400)
 
         # 设置窗口图标
-        if os.path.exists("icon.ico"):
-            self.setWindowIcon(QIcon("icon.ico"))
+        if os.path.exists(data.ICON):
+            self.setWindowIcon(QIcon(data.ICON))
 
         # 设置主题
         setTheme(Theme.LIGHT)
