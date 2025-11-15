@@ -1,10 +1,18 @@
-from core import res_path
+import os, sys, tomllib, logging
 
 STATUS = "Beta"
-VER1 = "3.1"
-VER2 = "b5"
+VER1 = "4.0"
+VER2 = "b6"
 VERSION = f"{STATUS} {VER1} ({VER2})"
 METHODS = ["男女混合", "男女分开", "完全随机"]
+
+def res_path(relative_path):
+    """获取打包后资源文件的绝对路径"""
+    if hasattr(sys, '_MEIPASS'):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 ICON = res_path('icon.ico')
 
@@ -24,3 +32,46 @@ HELP_TEXT = """
 教室为Excel xlsx文件，程序会将所有有4个边边框，且内容为空白或学生名字的单元格视为一个座位。每组相连且背景色相同的单元格会被视为一个小组。在一个座位格子中，可以写上同学名字，相当于提前分配座位。
 如果无法理解，可以看看测试数据（名单：test1.xlsx；教室：test2.xlsx）。
 """.strip()
+
+if not os.path.exists('config.toml'):
+    with open('config.toml', 'w', encoding = 'utf8') as f:
+        data = '''log_level = "info"
+'''
+        f.write(data)
+
+with open('config.toml', 'rb') as f:
+    data = tomllib.load(f)
+
+log_level = {"debug":logging.DEBUG, "info":logging.INFO, "warning":logging.WARNING, "error":logging.ERROR, "critical":logging.CRITICAL,
+             0:logging.DEBUG, 1:logging.info, 2:logging.WARNING, 3:logging.ERROR, 4:logging.CRITICAL}[data['log_level']]
+
+class Logger:
+    def __init__(self, logname="SeatShuffler.log", loglevel=log_level, loggername=None):
+        '''
+           指定保存日志的文件路径，日志级别，以及调用文件
+           将日志存入到指定的文件中
+        '''
+        # 创建一个logger
+        self.logger = logging.getLogger(loggername)
+        self.logger.setLevel(loglevel)
+        # 创建一个handler，用于写入日志文件
+        fh = logging.FileHandler(logname)
+        fh.setLevel(loglevel)
+        if not self.logger.handlers:
+            # 再创建一个handler，用于输出到控制台
+            ch = logging.StreamHandler()
+            ch.setLevel(loglevel)
+            # 定义handler的输出格式
+            # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            formatter = logging.Formatter('[%(levelname)s]%(asctime)s %(filename)s:%(lineno)d: %(message)s')
+            fh.setFormatter(formatter)
+            ch.setFormatter(formatter)
+            # 给logger添加handler
+            self.logger.addHandler(fh)
+            self.logger.addHandler(ch)
+            
+            self.logger.debug("add handler")
+        self.logger.debug("set logger")
+    def getlog(self):
+        self.logger.debug("get logger")
+        return self.logger

@@ -7,6 +7,8 @@ from qfluentwidgets import (setTheme, Theme, PrimaryPushButton, PushButton, Comb
 import data
 import core
 
+logger = data.Logger().getlog()
+
 class InputPage(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -123,30 +125,28 @@ class InputPage(QWidget):
             return
 
         try:
-            # 禁用按钮，防止重复点击
             self.complete_btn.setEnabled(False)
-
-            # 执行算法
-            result = core.shuffle(student_file, classroom_file, method_index, output_file)
-
-            # 切换到完成页面
+            logger.info('start to call core.shuffle()')
+            logger.debug(f'file1 {student_file}; file2 {classroom_file}; method {method_index}; output {output_file}')
+            core.shuffle(student_file, classroom_file, method_index, output_file)
+            logger.info('call finished')
             self.parent.switchToCompletePage(output_file)
-
-            # 尝试打开结果文件
             self.open_result_file(output_file)
         except Exception as e:
+            logger.error(f'Failed to shuffle: {e.__class__.__name__}: {e}')
             MessageBox("错误", f"执行过程中出现错误：\n{e.__class__.__name__}: {str(e)}", self).exec()
-            # 重新启用按钮
             self.complete_btn.setEnabled(True)
 
     def open_result_file(self, result_file):
         if not os.path.exists(result_file):
+            logger.warning(f"Cannot find result file: {result_file}")
             MessageBox("警告", f"未找到结果文件: {result_file}", self).exec()
             return
 
         try:
             core.open_file(result_file)
         except Exception as e:
+            logger.error(f'Failed to open result file: {e.__class__.__name__}: {e}')
             MessageBox("警告", f"无法自动打开结果文件: \n{e.__class__.__name__}: {str(e)}", self).exec()
 
 

@@ -1,8 +1,9 @@
 import random, time, sys, os
 import openpyxl as xl
 
-import algo
+import algo, data
 
+logger = data.Logger().getlog()
 merged_cells = {}
 c = [] # 小组列表
 v = [] # visited
@@ -19,7 +20,7 @@ def shuffle(file1, file2, method, output):
             genders=[ws.cell(j, i).value for j in range(2, ws.max_row + 1)]
     students = list(filter(lambda x: x, students))
     genders = list(filter(lambda x: x, genders))
-    # print(students, genders)
+    logger.debug(f'students: {students}, genders: {genders}')
     if len(students) != len(genders):
         raise RuntimeError("学生与性别数据数量不一致")
     book = xl.load_workbook(file2)
@@ -44,7 +45,7 @@ def shuffle(file1, file2, method, output):
             if not v[i][j] and if_bordered(sheet.cell(i, j)):
                 c.append([])
                 dfs(i, j, dimx, dimy, sheet)
-    # print(c)
+    logger.debug(f'c = {c}')
 
     # 数据处理
     n = len(c)
@@ -69,13 +70,12 @@ def shuffle(file1, file2, method, output):
                 pre_names.append(val)
             elif val:
                 m[-1] -= 1
-    # print(n, m, pre_boys, pre_girls, sep='\n')
+    logger.debug(f'{n}, {m}, {pre_boys}, {pre_girls}')
 
     # 调用算法
-    # print(type(method))
     func=[algo.allocate_groups, algo.allocate_groups_random, algo.allocate_groups_separated][method]
     res=func(n, m, pre_boys, pre_girls, total_boys, total_girls)
-    # print(res)
+    logger.debug(f'res = {res}')
 
     # 分配座位
     for i in range(len(c)):
@@ -88,25 +88,24 @@ def shuffle(file1, file2, method, output):
     boys = filter(lambda x: genders[students.index(x)] == '男', students)
     girls=filter(lambda x: genders[students.index(x)] == '女', students)
     for i in range(n):
-        # print(res[i])
-        # print('i', i)
+        logger.debug(f'i = {i}\nres[i] = {res[i]}')
         boys_cnt, girls_cnt = res[i][0] - pre_boys[i], res[i][1] - pre_girls[i]
         gender_ls = [0] * boys_cnt + [1] * girls_cnt
         random.shuffle(gender_ls)
         p = 0 # 座位
         q = 0 # 学生
         while q < (boys_cnt + girls_cnt):
-            # print('q',q)
+            logger.debug(f'q {q}')
             if gender_ls[q]:
                 target = next(girls)
             else:
                 target = next(boys)
             if target in pre_names:
                 continue
-            # print(target)
+            logger.debug(f'target {target}')
             while c[i][p].value:
                 p += 1
-                # print('p',p)
+                logger.debug(f'p {p}')
             c[i][p].value = target
             q += 1
 
@@ -138,14 +137,6 @@ def dfs(x, y, dimx, dimy, sheet):
 def if_bordered(cell):
     return cell.border.left.style and cell.border.right.style and cell.border.top.style and cell.border.bottom.style
 
-def res_path(relative_path):
-    """获取打包后资源文件的绝对路径"""
-    if hasattr(sys, '_MEIPASS'):
-        base_path = sys._MEIPASS
-    else:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
 def open_file(file_path):
     """打开文件"""
     if sys.platform == "win32":
@@ -156,4 +147,4 @@ def open_file(file_path):
         subprocess.run(["xdg-open", file_path])
 
 if __name__=='__main__':
-    shuffle('2-1名单.xlsx','test2.xlsx',0,'result.xlsx')
+    shuffle('test1.xlsx','test2.xlsx',0,'result.xlsx')

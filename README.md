@@ -1,5 +1,3 @@
 # SeatShuffler By YuanqiTech
 
-Shit mountain code
-
-
+shit mountain code
